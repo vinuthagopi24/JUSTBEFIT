@@ -1,0 +1,55 @@
+/* JUSTBEFIT Dark Aesthetic Gym Styling */
+:root {
+    --brand-glow: rgba(16, 185, 129, 0.25);
+    --accent-glow: rgba(6, 182, 212, 0.25);
+}
+
+/* Atmospheric Gym Background across the application */
+body.gym-aesthetic-bg {
+    background-color: #0b0f19;
+    background-image: 
+        radial-gradient(circle at 15% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.06) 0%, transparent 45%),
+        linear-gradient(180deg, rgba(11, 15, 25, 0.93) 0%, rgba(15, 23, 42, 0.95) 45%, rgba(11, 15, 25, 0.97) 100%),
+        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Glassmorphism Panels */
+.glass-card {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+.glass-card:hover {
+    border-color: rgba(71, 85, 105, 0.8);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px -3px var(--brand-glow);
+}
+
+/* Hero Gym Banner */
+.gym-hero-banner {
+    background-image: 
+        linear-gradient(90deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(15, 23, 42, 0.92) 100%),
+        url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1920&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center 30%;
+}
+
+/* Pulse animation */
+@keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.55); }
+}
+
+.glow-active {
+    animation: glowPulse 2.5s infinite;
+}
+
+/* Custom Table Styles */
+table th {
+    letter-spacing: 0.05em;
+}

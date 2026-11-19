@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Check-in Desk & Attendance | JUSTBEFIT{% endblock %}
+{% block page_title %}Check-in Desk & Gym Attendance{% endblock %}
+
+{% block content %}
+<!-- Top Attendance Stats -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Currently in Gym -->
+    <div class="glass-card p-5 rounded-2xl flex items-center justify-between shadow-sm">
+        <div>
+            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Live Floor Occupancy</span>
+            <div class="mt-2 flex items-baseline space-x-2">
+                <span class="text-3xl font-black text-sky-400 font-display">{{ currently_in|length }}</span>
+                <span class="text-xs text-slate-400 font-medium">Lifting right now</span>
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-person-running"></i>
+        </div>
+    </div>
+
+    <!-- Total Visits Today -->
+    <div class="glass-card p-5 rounded-2xl flex items-center justify-between shadow-sm">
+        <div>
+            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Total Check-ins Today</span>
+            <div class="mt-2 flex items-baseline space-x-2">
+                <span class="text-3xl font-black text-brand-400 font-display">{{ today_records|length }}</span>
+                <span class="text-xs text-slate-400 font-medium">Workouts logged</span>
+            </div>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+    </div>
+
+    <!-- Quick Check-in Box -->
+    <div class="glass-card p-5 rounded-2xl shadow-sm border border-brand-500/30">
+        <span class="text-xs text-brand-400 font-bold uppercase tracking-wider block mb-2">Fast Member Check-In</span>
+        <form action="{{ url_for('attendance_checkin') }}" method="POST" class="flex items-center space-x-2">
+            <select name="member_id" required class="flex-1 bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2.5 outline-none focus:border-brand-500">
+                <option value="">Select Member...</option>
+                {% for m in members %}
+                <option value="{{ m.id }}">{{ m.member_code }} - {{ m.first_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors shadow-sm shrink-0">
+                Check In
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Currently Lifting (Active Occupancy) -->
+<div class="glass-card rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+            <h3 class="font-bold text-white font-display text-base">Currently Working Out in Gym</h3>
+        </div>
+        <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full font-semibold">{{ currently_in|length }} Members Active</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {% for att in currently_in %}
+        <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-xl flex items-center justify-between group hover:border-slate-700 transition-colors">
+            <div class="flex items-center space-x-3">
+                <img src="{{ att.avatar_url }}" alt="{{ att.first_name }}" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                <div>
+                    <a href="{{ url_for('member_detail', member_id=att.member_id) }}" class="font-bold text-sm text-white hover:text-brand-400 block">
+                        {{ att.first_name }}
+                    </a>
+                    <span class="text-[11px] text-slate-400 font-mono">{{ att.member_code }}</span>
+                    <span class="text-[11px] text-emerald-400 block font-medium">In: {{ att.check_in_time.split(' ')[1][:5] }}</span>
+                </div>
+            </div>
+
+            <form action="{{ url_for('attendance_checkout', attendance_id=att.id) }}" method="POST">
+                <button type="submit" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                    Check Out
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="col-span-4 text-center py-8 text-slate-500 text-xs">
+            <i class="fa-solid fa-dumbbell text-2xl mb-2 text-slate-600 block"></i>
+            No members currently on the gym floor. Check them in as they arrive!
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Full Today's Attendance Table -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-4 border-b border-slate-800">
+        <h3 class="font-bold text-white font-display text-base">Today's Complete Attendance Log</h3>
+        <p class="text-xs text-slate-400">All member visits recorded on {{ current_date }}</p>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                    <th class="py-3 px-4">Member</th>
+                    <th class="py-3 px-4">Phone</th>
+                    <th class="py-3 px-4">Check-in Time</th>
+                    <th class="py-3 px-4">Check-out Time</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+                {% for att in today_records %}
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="py-3.5 px-4 font-semibold text-white">
+                        <a href="{{ url_for('member_detail', member_id=att.member_id) }}" class="hover:text-brand-400">
+                            {{ att.first_name }}
+                        </a>
+                        <span class="text-slate-500 text-[10px] block font-mono">{{ att.member_code }}</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-300">{{ att.phone }}</td>
+                    <td class="py-3.5 px-4 text-emerald-400 font-medium">{{ att.check_in_time.split(' ')[1][:8] }}</td>
+                    <td class="py-3.5 px-4 text-slate-300">
+                        {{ att.check_out_time.split(' ')[1][:8] if att.check_out_time else '—' }}
+                    </td>
+                    <td class="py-3.5 px-4">
+                        {% if att.check_out_time %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">Completed</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">In Gym</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                        {% if not att.check_out_time %}
+                        <form action="{{ url_for('attendance_checkout', attendance_id=att.id) }}" method="POST">
+                            <button type="submit" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition-colors">
+                                Check Out
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-slate-500 text-[11px]">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

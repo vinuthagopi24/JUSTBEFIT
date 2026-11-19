@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Subscriptions Management | JUSTBEFIT{% endblock %}
+{% block page_title %}Subscriptions & Membership Passes{% endblock %}
+
+{% block content %}
+<!-- Subscriptions KPI Toolbar -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Active Passes -->
+    <a href="{{ url_for('subscriptions_list', status='active') }}" class="glass-card {% if status_filter == 'active' %}border-emerald-500 bg-emerald-950/20{% endif %} p-4 rounded-xl flex items-center justify-between hover:border-slate-700 transition-all">
+        <div>
+            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Active Memberships</span>
+            <span class="text-2xl font-bold text-emerald-400 font-display mt-1 block">Active Passes</span>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+    </a>
+
+    <!-- Expiring Soon -->
+    <a href="{{ url_for('subscriptions_list', status='expiring_soon') }}" class="glass-card {% if status_filter == 'expiring_soon' %}border-amber-500 bg-amber-950/20{% endif %} p-4 rounded-xl flex items-center justify-between hover:border-slate-700 transition-all">
+        <div>
+            <span class="text-xs text-amber-400 font-semibold uppercase tracking-wider block">Expiring (7 Days)</span>
+            <span class="text-2xl font-bold text-amber-300 font-display mt-1 block">{{ expiring_count }} Action Needed</span>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+    </a>
+
+    <!-- Expired -->
+    <a href="{{ url_for('subscriptions_list', status='expired') }}" class="glass-card {% if status_filter == 'expired' %}border-rose-500 bg-rose-950/20{% endif %} p-4 rounded-xl flex items-center justify-between hover:border-slate-700 transition-all">
+        <div>
+            <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Expired Passes</span>
+            <span class="text-2xl font-bold text-rose-400 font-display mt-1 block">Renewal Required</span>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-circle-xmark"></i>
+        </div>
+    </a>
+</div>
+
+<!-- Subscriptions Table Section -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <!-- Filter Pills -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto text-xs">
+            <a href="{{ url_for('subscriptions_list') }}" class="px-3 py-1.5 rounded-lg font-medium transition-colors {% if not status_filter %}bg-brand-500 text-white font-bold{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700{% endif %}">
+                All ({{ subscriptions|length }})
+            </a>
+            <a href="{{ url_for('subscriptions_list', status='active') }}" class="px-3 py-1.5 rounded-lg font-medium transition-colors {% if status_filter == 'active' %}bg-emerald-500 text-white font-bold{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700{% endif %}">
+                Active Only
+            </a>
+            <a href="{{ url_for('subscriptions_list', status='expiring_soon') }}" class="px-3 py-1.5 rounded-lg font-medium transition-colors {% if status_filter == 'expiring_soon' %}bg-amber-500 text-white font-bold{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700{% endif %}">
+                Expiring Soon
+            </a>
+            <a href="{{ url_for('subscriptions_list', status='expired') }}" class="px-3 py-1.5 rounded-lg font-medium transition-colors {% if status_filter == 'expired' %}bg-rose-500 text-white font-bold{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700{% endif %}">
+                Expired
+            </a>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="document.getElementById('newSubModal').classList.remove('hidden')" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors shadow-sm flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus"></i>
+                <span>Assign New Plan</span>
+            </button>
+
+            <a href="{{ url_for('export_csv', entity='subscriptions') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-download text-slate-400"></i>
+                <span class="hidden sm:inline">Export CSV</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                    <th class="py-3 px-4">Member</th>
+                    <th class="py-3 px-4">Plan</th>
+                    <th class="py-3 px-4">Start Date</th>
+                    <th class="py-3 px-4">End Date</th>
+                    <th class="py-3 px-4">Remaining</th>
+                    <th class="py-3 px-4">Fee Paid</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+                {% for sub in subscriptions %}
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="py-3.5 px-4">
+                        <a href="{{ url_for('member_detail', member_id=sub.member_id) }}" class="font-bold text-white hover:text-brand-400 block">
+                            {{ sub.first_name }}
+                        </a>
+                        <span class="font-mono text-[10px] text-slate-400 bg-slate-800 px-1 py-0.5 rounded">{{ sub.member_code }}</span>
+                    </td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-200">
+                        {{ sub.plan_name }}
+                        <span class="text-slate-500 text-[10px] block">{{ sub.duration_months }} Month{{ 's' if sub.duration_months != 1 else '' }}</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-300">{{ sub.start_date }}</td>
+                    <td class="py-3.5 px-4 text-slate-300 font-medium">{{ sub.end_date }}</td>
+                    <td class="py-3.5 px-4">
+                        {% if sub.days_remaining < 0 %}
+                            <span class="text-rose-400 font-bold">Expired {{ sub.days_remaining|abs }}d ago</span>
+                        {% elif sub.days_remaining <= 7 %}
+                            <span class="text-amber-400 font-bold animate-pulse">{{ sub.days_remaining }} days left</span>
+                        {% else %}
+                            <span class="text-emerald-400 font-bold">{{ sub.days_remaining }} days</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="font-bold text-white">${{ "%.2f"|format(sub.amount_paid) }}</span>
+                        <span class="text-[10px] text-slate-400 block">{{ sub.payment_method }}</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ sub.badge_color }}">
+                            {{ sub.computed_status }}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right">
+                        <a href="{{ url_for('member_detail', member_id=sub.member_id) }}" class="inline-block text-xs bg-brand-500/10 hover:bg-brand-500 text-brand-400 hover:text-white border border-brand-500/30 px-2.5 py-1 rounded-lg transition-colors font-medium">
+                            Renew / View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ================= MODAL: ASSIGN NEW SUBSCRIPTION ================= -->
+<div id="newSubModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-white font-display">Assign New Subscription</h3>
+                <p class="text-xs text-slate-400">Issue a gym membership pass to a client</p>
+            </div>
+            <button onclick="document.getElementById('newSubModal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('subscription_create') }}" method="POST" class="mt-4 space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Select Member *</label>
+                <select name="member_id" required class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                    <option value="">Choose Member...</option>
+                    {% for m in members %}
+                    <option value="{{ m.id }}">{{ m.member_code }} - {{ m.first_name }} ({{ m.phone }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Select Plan *</label>
+                <select name="plan_id" required class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                    {% for p in plans %}
+                    <option value="{{ p.id }}">{{ p.name }} - ${{ p.price }} ({{ p.duration_months }} Months)</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Start Date *</label>
+                    <input type="date" name="start_date" required value="{{ current_date }}" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 focus:border-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Method</label>
+                    <select name="payment_method" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                        <option value="UPI / Online">UPI / Online Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Notes / Remarks</label>
+                <input type="text" name="notes" placeholder="e.g. Paid in full via UPI" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('newSubModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+                    Activate Pass
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

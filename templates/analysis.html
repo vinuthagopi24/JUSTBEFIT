@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Client Workout Analysis | JUSTBEFIT{% endblock %}
+{% block page_title %}Client Workout & Performance Analysis{% endblock %}
+
+{% block content %}
+<!-- Aesthetic Hero Banner for Workout Analysis -->
+<div class="relative overflow-hidden rounded-3xl border border-slate-800 p-6 sm:p-8 gym-hero-banner shadow-2xl">
+    <div class="relative z-10 max-w-2xl">
+        <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-bold uppercase tracking-wider mb-3">
+            <i class="fa-solid fa-fire text-amber-400"></i> Performance Intelligence
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-black text-white font-display tracking-tight">
+            How Each Client Is Working & Transforming
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+            In-depth workout frequency analysis, routine splits, training intensity, dietary compliance, and head trainer assessments for every member.
+        </p>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+            <a href="{{ url_for('attendance_view') }}" class="inline-flex items-center space-x-2 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-brand-500/25">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>Open Check-in Desk</span>
+            </a>
+            <a href="{{ url_for('member_new') }}" class="inline-flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors">
+                <i class="fa-solid fa-user-plus text-brand-400"></i>
+                <span>Register New Client</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Summary Stats -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="glass-card p-4 rounded-2xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Monitored Clients</span>
+        <span class="text-3xl font-black text-white font-display mt-1 block">{{ clients|length }}</span>
+        <span class="text-[10px] text-brand-400 font-medium">100% active profiles</span>
+    </div>
+
+    <div class="glass-card p-4 rounded-2xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Top Consistency</span>
+        <span class="text-3xl font-black text-emerald-400 font-display mt-1 block">92%</span>
+        <span class="text-[10px] text-slate-400 font-medium">Bhairav & Gopi</span>
+    </div>
+
+    <div class="glass-card p-4 rounded-2xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Avg Weekly Visits</span>
+        <span class="text-3xl font-black text-accent-400 font-display mt-1 block">4.2</span>
+        <span class="text-[10px] text-slate-400 font-medium">Workouts / client</span>
+    </div>
+
+    <div class="glass-card p-4 rounded-2xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Transformation Leader</span>
+        <span class="text-3xl font-black text-amber-300 font-display mt-1 block">-13.3 kg</span>
+        <span class="text-[10px] text-slate-400 font-medium">Gopi (Fat Loss)</span>
+    </div>
+</div>
+
+<!-- Client-by-Client Comprehensive Workout & Performance Cards -->
+<div class="space-y-4">
+    <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold font-display text-white flex items-center space-x-2">
+            <i class="fa-solid fa-chart-line text-brand-400"></i>
+            <span>Individual Client Workout Breakdown ({{ clients|length }} Clients)</span>
+        </h3>
+        <span class="text-xs text-slate-400">Evaluated over past 30 days</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {% for c in clients %}
+        <div class="glass-card rounded-2xl p-6 transition-all duration-200 group flex flex-col justify-between">
+            <div>
+                <!-- Header with Avatar and Basic Details -->
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center space-x-3.5">
+                        <img src="{{ c.avatar_url }}" alt="{{ c.first_name }}" class="w-14 h-14 rounded-2xl object-cover border-2 border-slate-700 group-hover:border-brand-500 transition-colors shadow-md">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ url_for('member_detail', member_id=c.id) }}" class="text-lg font-black text-white hover:text-brand-400 font-display">
+                                    {{ c.first_name }}
+                                </a>
+                                <span class="font-mono text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-bold">{{ c.member_code }}</span>
+                            </div>
+                            <span class="text-xs text-brand-400 font-medium block">{{ c.fitness_goal }}</span>
+                            <span class="text-[11px] text-slate-400"><i class="fa-solid fa-phone text-[10px] mr-1 text-slate-500"></i> {{ c.phone }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Dedication Tier Badge -->
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full border {{ c.analysis.rating_color }}">
+                        {{ c.analysis.rating_badge }}
+                    </span>
+                </div>
+
+                <!-- Training Routine, Intensity & Nutrition Split -->
+                <div class="mt-4 pt-4 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Assigned Workout Split</span>
+                        <div class="font-bold text-slate-200 mt-0.5 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-dumbbell text-brand-400 text-[11px]"></i>
+                            <span>{{ c.analysis.workout_split }}</span>
+                        </div>
+                        <span class="text-[10px] text-accent-400 font-medium block mt-1">Intensity: {{ c.analysis.workout_intensity }}</span>
+                    </div>
+
+                    <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Nutrition & Fuel Plan</span>
+                        <div class="font-bold text-slate-200 mt-0.5 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-utensils text-amber-400 text-[11px]"></i>
+                            <span class="truncate">{{ c.analysis.nutrition_plan }}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 block mt-1">Target: {{ c.target_weight or 'Not set' }} kg</span>
+                    </div>
+                </div>
+
+                <!-- Workout Consistency & Goal Velocity Meters -->
+                <div class="mt-4 space-y-3">
+                    <!-- Consistency Meter -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="text-slate-400 font-medium">Workout Consistency (30 Days)</span>
+                            <span class="font-bold text-white">{{ c.analysis.consistency_pct }}% ({{ c.analysis.recent_visits }} Sessions)</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                            <div class="bg-gradient-to-r from-brand-500 to-accent-500 h-2 rounded-full transition-all duration-500" style="width: {{ c.analysis.consistency_pct }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Transformation Progress Meter -->
+                    <div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="text-slate-400 font-medium">Goal Transformation Completed</span>
+                            <span class="font-bold {% if c.weight_change < 0 %}text-emerald-400{% else %}text-sky-400{% endif %}">
+                                {% if c.weight_change > 0 %}+{% endif %}{{ c.weight_change }} kg ({% if c.analysis.goal_completion_pct > 0 %}{{ c.analysis.goal_completion_pct }}%{% else %}Active{% endif %})
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                            <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-2 rounded-full transition-all duration-500" style="width: {{ c.analysis.goal_completion_pct if c.analysis.goal_completion_pct > 0 else 50 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trainer Direct Evaluation / Assessment -->
+                <div class="mt-4 p-3 bg-slate-950/80 rounded-xl border border-slate-800/90 text-xs">
+                    <span class="text-[10px] text-brand-400 font-bold uppercase tracking-wider flex items-center space-x-1 mb-1">
+                        <i class="fa-solid fa-clipboard-user"></i>
+                        <span>Trainer's Gym Floor Review:</span>
+                    </span>
+                    <p class="text-slate-300 italic">"{{ c.analysis.trainer_assessment }}"</p>
+                </div>
+            </div>
+
+            <!-- Footer Action Button -->
+            <div class="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between">
+                <div class="text-[11px] text-slate-400">
+                    Baseline: <strong class="text-slate-200">{{ c.initial_metrics.weight_kg if c.initial_metrics else '—' }}kg</strong> &rarr; 
+                    Current: <strong class="text-white">{{ c.current_weight or '—' }}kg</strong>
+                </div>
+
+                <a href="{{ url_for('member_detail', member_id=c.id) }}" class="inline-flex items-center space-x-1 text-xs font-bold bg-brand-500/10 hover:bg-brand-500 text-brand-400 hover:text-white border border-brand-500/30 px-3 py-1.5 rounded-lg transition-colors">
+                    <span>View Journey & Chart</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

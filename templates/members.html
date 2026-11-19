@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Customers Directory | JUSTBEFIT{% endblock %}
+{% block page_title %}Customers & Client Roster{% endblock %}
+
+{% block content %}
+<!-- Prominent Top Banner: Register New Customer CTA -->
+<div class="glass-card rounded-2xl p-5 border border-slate-700/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-500 to-accent-500 flex items-center justify-center text-white text-xl shadow-lg shadow-brand-500/20">
+            <i class="fa-solid fa-user-plus"></i>
+        </div>
+        <div>
+            <h2 class="text-base font-bold text-white font-display">New Customer Registration</h2>
+            <p class="text-xs text-slate-400">Onboard a new gym member, assign starting weight baseline, workout routine, and pass</p>
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-3">
+        <a href="{{ url_for('client_analysis') }}" class="text-xs font-bold bg-slate-900 hover:bg-slate-800 text-slate-300 px-3.5 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1.5">
+            <i class="fa-solid fa-chart-line text-accent-400"></i>
+            <span>Workout Analysis</span>
+        </a>
+        <a href="{{ url_for('member_new') }}" class="bg-gradient-to-r from-brand-500 to-emerald-600 hover:from-brand-600 hover:to-emerald-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/25 transition-all flex items-center space-x-1.5">
+            <i class="fa-solid fa-plus"></i>
+            <span>Register Customer</span>
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Toolbar -->
+<div class="glass-card rounded-2xl p-4 shadow-sm">
+    <form method="GET" action="{{ url_for('members_list') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <!-- Search bar -->
+        <div class="md:col-span-2 relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="text" name="search" value="{{ search }}" placeholder="Search Gopi, Vinutha, Bhairav, Acchu, Renuka, phone, or code..." class="w-full bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 text-xs rounded-xl pl-9 pr-3 py-2.5 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none">
+        </div>
+
+        <!-- Filter by Status -->
+        <div>
+            <select name="status" onchange="this.form.submit()" class="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                <option value="">All Statuses</option>
+                <option value="active" {% if status == 'active' %}selected{% endif %}>Active Customers</option>
+                <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive / Paused</option>
+            </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-2">
+            <button type="submit" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition-colors">
+                Apply Filter
+            </button>
+            <a href="{{ url_for('export_csv', entity='members') }}" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1" title="Download CSV">
+                <i class="fa-solid fa-download text-slate-400"></i>
+                <span class="hidden sm:inline">CSV</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Customers Table -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+            <span class="text-sm font-bold text-white font-display">Client Directory</span>
+            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full font-medium">{{ members|length }} Customers</span>
+        </div>
+        <span class="text-xs text-slate-400">Gopi, Vinutha, Bhairav, Acchu, Renuka, Shivanna, Rukmini, Appaji</span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                    <th class="py-3 px-4">Customer</th>
+                    <th class="py-3 px-4">Contact</th>
+                    <th class="py-3 px-4">Weight & BMI</th>
+                    <th class="py-3 px-4">Workout Routine & Split</th>
+                    <th class="py-3 px-4">Subscription</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+                {% for m in members %}
+                <tr class="hover:bg-slate-800/30 transition-colors group">
+                    <!-- Customer info -->
+                    <td class="py-3.5 px-4">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ m.avatar_url }}" alt="{{ m.first_name }}" class="w-10 h-10 rounded-full object-cover border border-slate-700">
+                            <div>
+                                <a href="{{ url_for('member_detail', member_id=m.id) }}" class="font-bold text-sm text-white hover:text-brand-400 block">
+                                    {{ m.first_name }}
+                                </a>
+                                <span class="font-mono text-[10px] text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded">{{ m.member_code }}</span>
+                                <span class="text-slate-500 text-[10px] ml-1">Joined {{ m.join_date }}</span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Contact -->
+                    <td class="py-3.5 px-4 text-slate-300">
+                        <div class="font-medium text-slate-200">{{ m.phone }}</div>
+                        <div class="text-[11px] text-slate-400">{{ m.email or 'No email' }}</div>
+                    </td>
+
+                    <!-- Weight & BMI -->
+                    <td class="py-3.5 px-4">
+                        {% if m.latest_weight %}
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-bold text-white">{{ m.latest_weight }} kg</span>
+                            {% if m.latest_bmi %}
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">BMI {{ m.latest_bmi }}</span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[10px] text-slate-400">Target: {{ m.target_weight or 'Not set' }} kg</span>
+                        {% else %}
+                        <span class="text-slate-500 italic text-xs">No weigh-ins yet</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Workout Split -->
+                    <td class="py-3.5 px-4">
+                        <span class="font-medium text-slate-200 block">{{ m.workout_split or 'General Conditioning' }}</span>
+                        <span class="text-[10px] text-accent-400 font-semibold">{{ m.fitness_goal or 'Health' }}</span>
+                    </td>
+
+                    <!-- Subscription Status -->
+                    <td class="py-3.5 px-4">
+                        {% if m.plan_name %}
+                            <div class="text-slate-200 font-semibold">{{ m.plan_name }}</div>
+                            <span class="text-[10px] text-slate-400">Ends: {{ m.sub_end_date }}</span>
+                        {% else %}
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-800 text-slate-400 border border-slate-700">No Plan</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-3.5 px-4 text-right space-x-1">
+                        <a href="{{ url_for('member_detail', member_id=m.id) }}" class="inline-flex items-center space-x-1 text-xs bg-brand-500/10 hover:bg-brand-500 text-brand-400 hover:text-white border border-brand-500/30 px-2.5 py-1.5 rounded-lg transition-colors font-medium">
+                            <i class="fa-solid fa-chart-line text-[11px]"></i>
+                            <span>Journey</span>
+                        </a>
+
+                        <a href="{{ url_for('member_edit', member_id=m.id) }}" class="inline-flex items-center text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1.5 rounded-lg border border-slate-700 transition-colors" title="Edit">
+                            <i class="fa-solid fa-pen text-[11px]"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

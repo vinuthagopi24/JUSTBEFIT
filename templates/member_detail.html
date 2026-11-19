@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% block title %}{{ member.first_name }} - Transformation Journey | JUSTBEFIT{% endblock %}
+{% block page_title %}{{ member.first_name }}'s Transformation & Workout Analysis{% endblock %}
+
+{% block content %}
+<!-- Customer Profile Header Card -->
+<div class="glass-card rounded-2xl p-6 shadow-xl relative overflow-hidden">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <!-- Avatar and Core Details -->
+        <div class="flex items-start sm:items-center space-x-4">
+            <img src="{{ member.avatar_url }}" alt="{{ member.first_name }}" class="w-20 h-20 rounded-2xl object-cover border-2 border-brand-500/50 shadow-lg">
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-2xl font-black text-white font-display">{{ member.first_name }}</h2>
+                    <span class="font-mono text-xs bg-brand-500/10 text-brand-400 border border-brand-500/30 px-2 py-0.5 rounded-md font-bold">
+                        {{ member.member_code }}
+                    </span>
+                    <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold {% if member.status == 'active' %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400{% endif %}">
+                        {{ member.status|capitalize }}
+                    </span>
+                    <span class="text-xs px-2.5 py-0.5 rounded-full font-bold border {{ member.analysis.rating_color }}">
+                        {{ member.analysis.rating_badge }}
+                    </span>
+                </div>
+
+                <div class="mt-2 flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-400">
+                    <span><i class="fa-solid fa-phone text-slate-500 mr-1.5"></i> {{ member.phone }}</span>
+                    {% if member.email %}
+                    <span><i class="fa-solid fa-envelope text-slate-500 mr-1.5"></i> {{ member.email }}</span>
+                    {% endif %}
+                    <span><i class="fa-regular fa-calendar-check text-slate-500 mr-1.5"></i> Joined {{ member.join_date }}</span>
+                    <span><i class="fa-solid fa-bullseye text-brand-400 mr-1.5"></i> Goal: <strong class="text-slate-200">{{ member.fitness_goal or 'General Fitness' }}</strong></span>
+                </div>
+
+                {% if member.emergency_contact %}
+                <div class="mt-2 text-[11px] text-slate-500">
+                    <i class="fa-solid fa-kit-medical text-rose-400/80 mr-1"></i> Emergency: {{ member.emergency_contact }} ({{ member.emergency_phone or 'No phone' }})
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2 self-start lg:self-center">
+            <button onclick="document.getElementById('logMetricModal').classList.remove('hidden')" class="bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-brand-500/20 flex items-center space-x-1.5">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>Log Weigh-In</span>
+            </button>
+
+            <button onclick="document.getElementById('renewSubModal').classList.remove('hidden')" class="bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>Renew Plan</span>
+            </button>
+
+            <a href="{{ url_for('member_edit', member_id=member.id) }}" class="bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors">
+                <i class="fa-solid fa-pen mr-1"></i> Edit
+            </a>
+
+            <form action="{{ url_for('member_delete', member_id=member.id) }}" method="POST" onsubmit="return confirm('Delete this client and transformation history?');">
+                <button type="submit" class="bg-slate-900/90 hover:bg-rose-950 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-800 text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= HOW THIS CLIENT IS WORKING: WORKOUT ANALYSIS ================= -->
+<div class="glass-card rounded-2xl p-6 shadow-lg border border-slate-700/80">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <div>
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-dumbbell text-accent-400 text-lg"></i>
+                <h3 class="text-base font-bold font-display text-white">Client Workout & Discipline Analysis: {{ member.first_name }}</h3>
+            </div>
+            <p class="text-xs text-slate-400">Head trainer's gym floor assessment, training intensity, and attendance regularity</p>
+        </div>
+        <span class="text-xs font-bold px-3 py-1 rounded-full border {{ member.analysis.rating_color }}">
+            {{ member.analysis.rating_badge }} ({{ member.analysis.consistency_pct }}% Consistency)
+        </span>
+    </div>
+
+    <!-- 4-Box Workout Metric Matrix -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Split -->
+        <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Assigned Split</span>
+            <span class="text-sm font-bold text-white mt-1 block flex items-center space-x-1.5">
+                <i class="fa-solid fa-bars-progress text-brand-400 text-xs"></i>
+                <span>{{ member.analysis.workout_split }}</span>
+            </span>
+            <span class="text-[11px] text-slate-400 mt-1 block">Intensity: <strong class="text-slate-300">{{ member.analysis.workout_intensity }}</strong></span>
+        </div>
+
+        <!-- Attendance Frequency -->
+        <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Workout Frequency</span>
+            <span class="text-2xl font-black text-accent-400 font-display mt-0.5 block">
+                {{ member.analysis.avg_visits_week }} <span class="text-xs font-normal text-slate-400">days/week</span>
+            </span>
+            <span class="text-[11px] text-slate-400 block">{{ member.analysis.recent_visits }} sessions in last 30 days</span>
+        </div>
+
+        <!-- Transformation Velocity -->
+        <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Transformation Velocity</span>
+            <span class="text-2xl font-black font-display mt-0.5 block {% if member.weight_change < 0 %}text-emerald-400{% else %}text-sky-400{% endif %}">
+                {% if member.analysis.velocity_per_month > 0 %}+{% endif %}{{ member.analysis.velocity_per_month }} <span class="text-xs font-normal text-slate-400">kg/mo</span>
+            </span>
+            <span class="text-[11px] text-slate-400 block">Goal Progress: {{ member.analysis.goal_completion_pct }}%</span>
+        </div>
+
+        <!-- Nutrition Regimen -->
+        <div class="bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">Nutrition Target</span>
+            <span class="text-xs font-bold text-slate-200 mt-1 block truncate">
+                <i class="fa-solid fa-utensils text-amber-400 mr-1"></i> {{ member.analysis.nutrition_plan }}
+            </span>
+            <span class="text-[11px] text-slate-400 mt-1 block">Goal: {{ member.target_weight or 'N/A' }} kg</span>
+        </div>
+    </div>
+
+    <!-- Trainer Assessment Remark Box -->
+    <div class="mt-4 p-4 bg-slate-950/90 rounded-xl border border-slate-800/90 flex items-start space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-accent-500/10 text-accent-400 flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fa-solid fa-quote-left text-xs"></i>
+        </div>
+        <div>
+            <span class="text-xs font-bold text-slate-200 block">Trainer's Floor Assessment of How {{ member.first_name }} is Working:</span>
+            <p class="text-xs text-slate-300 italic mt-1 leading-relaxed">
+                "{{ member.analysis.trainer_assessment }}"
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Transformation Scorecard: Weight, BMI, Body Composition -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+    <!-- Current Weight -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Current Weight</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-white font-display">{{ member.current_weight or '—' }}</span>
+            <span class="text-xs text-slate-400">kg</span>
+        </div>
+        <span class="text-[10px] text-slate-500">Target: {{ member.target_weight or 'Not set' }} kg</span>
+    </div>
+
+    <!-- Starting Weight -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Starting Baseline</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-slate-300 font-display">
+                {{ member.initial_metrics.weight_kg if member.initial_metrics else '—' }}
+            </span>
+            <span class="text-xs text-slate-400">kg</span>
+        </div>
+        <span class="text-[10px] text-slate-500">Day 1 registration</span>
+    </div>
+
+    <!-- Net Transformation Change -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Net Change</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black font-display {% if member.weight_change < 0 %}text-emerald-400{% else %}text-sky-400{% endif %}">
+                {% if member.weight_change > 0 %}+{% endif %}{{ member.weight_change }}
+            </span>
+            <span class="text-xs text-slate-400">kg</span>
+        </div>
+        <span class="text-[10px] {% if member.weight_change < 0 %}text-emerald-400{% else %}text-sky-400{% endif %} font-medium">
+            {% if member.weight_change < 0 %}Total Weight Lost{% elif member.weight_change > 0 %}Total Mass Gained{% else %}Maintained{% endif %}
+        </span>
+    </div>
+
+    <!-- Current BMI -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Current BMI</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-white font-display">{{ member.current_bmi or '—' }}</span>
+        </div>
+        <span class="text-[10px] text-brand-400 font-semibold">{{ member.bmi_category }}</span>
+    </div>
+
+    <!-- Latest Body Fat % -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Body Fat %</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-white font-display">
+                {{ member.latest_metrics.body_fat_pct if member.latest_metrics and member.latest_metrics.body_fat_pct else '—' }}
+            </span>
+            <span class="text-xs text-slate-400">%</span>
+        </div>
+        <span class="text-[10px] text-slate-500">Composition</span>
+    </div>
+
+    <!-- Muscle Mass % -->
+    <div class="glass-card p-4 rounded-xl">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Muscle Mass</span>
+        <div class="mt-2 flex items-baseline space-x-1">
+            <span class="text-2xl font-black text-white font-display">
+                {{ member.latest_metrics.muscle_mass_pct if member.latest_metrics and member.latest_metrics.muscle_mass_pct else '—' }}
+            </span>
+            <span class="text-xs text-slate-400">%</span>
+        </div>
+        <span class="text-[10px] text-slate-500">Lean Tissue</span>
+    </div>
+</div>
+
+<!-- Two Columns: Interactive Transformation Chart & Subscription Hub -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Interactive Transformation Chart (Takes 2 columns) -->
+    <div class="lg:col-span-2 glass-card rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+                <h3 class="text-base font-bold font-display text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-line text-brand-400"></i>
+                    <span>Weight & BMI Trajectory for {{ member.first_name }}</span>
+                </h3>
+                <p class="text-xs text-slate-400">Visual progress history from baseline to current weigh-in</p>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <span class="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1 rounded-lg font-medium">
+                    Height: {{ member.height_cm or 'N/A' }} cm
+                </span>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="w-full h-72">
+            <canvas id="transformationChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Active Subscription Status Card (Takes 1 column) -->
+    <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold font-display text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-id-card-clip text-accent-400"></i>
+                    <span>Active Subscription</span>
+                </h3>
+                {% if member.subscription %}
+                    {% if member.subscription.state == 'active' %}
+                    <span class="text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-0.5 rounded-full">Active</span>
+                    {% elif member.subscription.state == 'expiring_soon' %}
+                    <span class="text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2.5 py-0.5 rounded-full animate-pulse">Expiring Soon</span>
+                    {% else %}
+                    <span class="text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2.5 py-0.5 rounded-full">Expired</span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-xs font-semibold bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">No Plan</span>
+                {% endif %}
+            </div>
+
+            {% if member.subscription %}
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-3">
+                <div>
+                    <span class="text-xs text-slate-400 block">Current Plan Tier</span>
+                    <span class="text-lg font-bold text-white">{{ member.subscription.plan_name }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Valid From</span>
+                        <span class="text-xs font-semibold text-slate-200">{{ member.subscription.start_date }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Expires On</span>
+                        <span class="text-xs font-semibold text-slate-200">{{ member.subscription.end_date }}</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Days Remaining</span>
+                        <span class="text-sm font-bold {% if member.subscription.days_remaining <= 7 %}text-amber-400{% else %}text-emerald-400{% endif %}">
+                            {{ member.subscription.days_remaining }} Days
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-slate-400 block">Fee Paid</span>
+                        <span class="text-sm font-bold text-white">${{ "%.2f"|format(member.subscription.amount_paid) }}</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-6 text-slate-500 text-xs bg-slate-950/40 rounded-xl border border-slate-800">
+                <i class="fa-solid fa-ticket text-2xl mb-2 text-slate-600 block"></i>
+                No active pass found. Assign a plan below.
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800 space-y-2">
+            <button onclick="document.getElementById('renewSubModal').classList.remove('hidden')" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center space-x-1.5">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Renew / Upgrade Plan</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Body Measurements Comparison & Transformation Progress Table -->
+<div class="glass-card rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h3 class="font-bold text-white font-display text-base flex items-center space-x-2">
+                <i class="fa-solid fa-ruler-combined text-brand-400"></i>
+                <span>Weigh-in History & Body Circumferences ({{ member.first_name }})</span>
+            </h3>
+            <p class="text-xs text-slate-400">Measurements tracking waist, chest, arms & thighs over time</p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="document.getElementById('logMetricModal').classList.remove('hidden')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3 py-2 rounded-xl border border-slate-700 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-plus text-brand-400"></i>
+                <span>Add Log Entry</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950/70 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                <tr>
+                    <th class="py-3 px-4">Date</th>
+                    <th class="py-3 px-4">Weight</th>
+                    <th class="py-3 px-4">BMI</th>
+                    <th class="py-3 px-4">Body Fat %</th>
+                    <th class="py-3 px-4">Muscle %</th>
+                    <th class="py-3 px-4">Chest (cm)</th>
+                    <th class="py-3 px-4">Waist (cm)</th>
+                    <th class="py-3 px-4">Arms (cm)</th>
+                    <th class="py-3 px-4">Notes</th>
+                    <th class="py-3 px-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60">
+                {% for log in logs|reverse %}
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-slate-200">{{ log.log_date }}</td>
+                    <td class="py-3 px-4 font-bold text-white text-sm">{{ log.weight_kg }} kg</td>
+                    <td class="py-3 px-4">
+                        {% if log.bmi %}
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">{{ log.bmi }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="py-3 px-4 text-slate-300">{{ log.body_fat_pct ~ '%' if log.body_fat_pct else '—' }}</td>
+                    <td class="py-3 px-4 text-slate-300">{{ log.muscle_mass_pct ~ '%' if log.muscle_mass_pct else '—' }}</td>
+                    <td class="py-3 px-4 text-slate-300">{{ log.chest_cm or '—' }}</td>
+                    <td class="py-3 px-4 text-slate-300">{{ log.waist_cm or '—' }}</td>
+                    <td class="py-3 px-4 text-slate-300">{{ log.bicep_cm or '—' }}</td>
+                    <td class="py-3 px-4 text-slate-400 max-w-xs truncate" title="{{ log.notes }}">{{ log.notes or 'Routine Check' }}</td>
+                    <td class="py-3 px-4 text-right">
+                        <form action="{{ url_for('delete_metric', member_id=member.id, log_id=log.id) }}" method="POST" onsubmit="return confirm('Delete this measurement log?');">
+                            <button type="submit" class="text-slate-500 hover:text-rose-400 p-1" title="Delete">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="text-center py-8 text-slate-500 text-xs">
+                        No transformation logs recorded yet. Click "Log Weigh-In" to record the baseline.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Member Attendance History -->
+<div class="glass-card rounded-2xl p-5 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-white font-display text-sm flex items-center space-x-2">
+            <i class="fa-solid fa-calendar-days text-sky-400"></i>
+            <span>Gym Visit & Attendance History ({{ member.first_name }})</span>
+        </h3>
+        <span class="text-xs text-slate-400">Recent check-in records</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        {% for att in attendance_list %}
+        <div class="bg-slate-950/60 border border-slate-800 p-3 rounded-xl text-xs">
+            <span class="text-slate-400 block font-medium">{{ att.log_date }}</span>
+            <span class="text-white font-semibold mt-1 block">In: {{ att.check_in_time.split(' ')[1][:5] }}</span>
+            <span class="text-slate-500 text-[10px] block">
+                {% if att.check_out_time %}
+                Out: {{ att.check_out_time.split(' ')[1][:5] }}
+                {% else %}
+                Currently Active
+                {% endif %}
+            </span>
+        </div>
+        {% else %}
+        <div class="col-span-5 text-center py-4 text-slate-500 text-xs">
+            No attendance visits recorded yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ================= MODAL: LOG NEW MEASUREMENT ================= -->
+<div id="logMetricModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-white font-display">Log Weigh-In & Body Metrics</h3>
+                <p class="text-xs text-slate-400">Record transformation progress for {{ member.first_name }}</p>
+            </div>
+            <button onclick="document.getElementById('logMetricModal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('log_metric', member_id=member.id) }}" method="POST" class="mt-4 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Measurement Date *</label>
+                    <input type="date" name="log_date" required value="{{ current_date }}" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Current Weight (kg) *</label>
+                    <input type="number" step="0.1" name="weight_kg" required placeholder="e.g. 81.0" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Height (cm)</label>
+                    <input type="number" step="0.5" name="height_cm" value="{{ member.height_cm or '' }}" placeholder="cm" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Body Fat %</label>
+                    <input type="number" step="0.1" name="body_fat_pct" placeholder="e.g. 19.5" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Muscle Mass %</label>
+                    <input type="number" step="0.1" name="muscle_mass_pct" placeholder="e.g. 37.0" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Chest (cm)</label>
+                    <input type="number" step="0.5" name="chest_cm" placeholder="cm" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Waist (cm)</label>
+                    <input type="number" step="0.5" name="waist_cm" placeholder="cm" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Hips (cm)</label>
+                    <input type="number" step="0.5" name="hips_cm" placeholder="cm" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Bicep (cm)</label>
+                    <input type="number" step="0.5" name="bicep_cm" placeholder="cm" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-2.5 py-2 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Workout Notes / Milestones</label>
+                <textarea name="notes" rows="2" placeholder="e.g. Lifting heavier, waist down, stamina elevated..." class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl p-3 outline-none"></textarea>
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('logMetricModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+                    Save Measurement
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= MODAL: RENEW SUBSCRIPTION ================= -->
+<div id="renewSubModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-white font-display">Renew or Assign Subscription</h3>
+                <p class="text-xs text-slate-400">Extend membership pass for {{ member.first_name }}</p>
+            </div>
+            <button onclick="document.getElementById('renewSubModal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('subscription_create') }}" method="POST" class="mt-4 space-y-4">
+            <input type="hidden" name="member_id" value="{{ member.id }}">
+            <input type="hidden" name="redirect_to" value="{{ url_for('member_detail', member_id=member.id) }}">
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Select Membership Plan *</label>
+                <select name="plan_id" required class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                    {% for p in plans %}
+                    <option value="{{ p.id }}">{{ p.name }} - ${{ p.price }} ({{ p.duration_months }} Month{{ 's' if p.duration_months != 1 else '' }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Start Date *</label>
+                    <input type="date" name="start_date" required value="{{ current_date }}" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 focus:border-brand-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Method</label>
+                    <select name="payment_method" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                        <option value="UPI / Online">UPI / Online Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Payment Reference</label>
+                <input type="text" name="notes" placeholder="e.g. Paid in full via UPI" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('renewSubModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+                    Activate Pass
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('transformationChart');
+    if (ctx) {
+        fetch('{{ url_for("api_member_metrics", member_id=member.id) }}')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.labels || data.labels.length === 0) {
+                    return;
+                }
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                label: 'Weight (kg)',
+                                data: data.weights,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                                tension: 0.35,
+                                fill: true,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'BMI',
+                                data: data.bmis,
+                                borderColor: '#06b6d4',
+                                borderDash: [4, 4],
+                                tension: 0.35,
+                                fill: false,
+                                pointBackgroundColor: '#06b6d4',
+                                pointRadius: 4,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                                ticks: { color: '#94a3b8', font: { size: 11 } }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                                ticks: {
+                                    color: '#10b981',
+                                    callback: function(value) { return value + ' kg'; }
+                                },
+                                title: { display: true, text: 'Body Weight (kg)', color: '#10b981', font: { size: 11, weight: 'bold' } }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: '#06b6d4' },
+                                title: { display: true, text: 'BMI', color: '#06b6d4', font: { size: 11, weight: 'bold' } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0', font: { size: 12, weight: 'bold' }, usePointStyle: true }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0f172a',
+                                titleColor: '#fff',
+                                bodyColor: '#cbd5e1',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: true
+                            }
+                        }
+                    }
+                });
+            });
+    }
+</script>
+{% endblock %}

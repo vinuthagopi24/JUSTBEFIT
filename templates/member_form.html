@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}{% if member %}Edit {{ member.first_name }}{% else %}Register New Customer{% endif %} | JUSTBEFIT{% endblock %}
+{% block page_title %}{% if member %}Edit Profile: {{ member.first_name }} {{ member.last_name }}{% else %}Customer Registration & Journey Setup{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto glass-card rounded-2xl p-6 sm:p-8 shadow-2xl">
+    <div class="flex items-center justify-between pb-6 border-b border-slate-800">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-500 to-accent-500 flex items-center justify-center text-white text-xl shadow-lg shadow-brand-500/20">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold font-display text-white">
+                    {% if member %}Update Profile: {{ member.first_name }} {{ member.last_name }}{% else %}New Customer Registration{% endif %}
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Capture client details, initial baseline weight, training routine split, and pass.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('members_list') }}" class="text-xs text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800 px-3.5 py-2 rounded-xl border border-slate-700 transition-colors">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Back to Roster
+        </a>
+    </div>
+
+    <form method="POST" action="{% if member %}{{ url_for('member_edit', member_id=member.id) }}{% else %}{{ url_for('member_new') }}{% endif %}" class="mt-6 space-y-6">
+        <!-- Section 1: Customer Personal Details -->
+        <div>
+            <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-user"></i>
+                <span>Customer Identity & Contact Information</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">First Name (e.g. Gopi, Vinutha, Bhairav) *</label>
+                    <input type="text" name="first_name" required value="{{ member.first_name if member else '' }}" placeholder="e.g. Gopi" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Last Name / Surname</label>
+                    <input type="text" name="last_name" value="{{ member.last_name if member else '' }}" placeholder="e.g. Kumar" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Phone Number *</label>
+                    <input type="text" name="phone" required value="{{ member.phone if member else '' }}" placeholder="e.g. +91 98450 12345" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+                    <input type="email" name="email" value="{{ member.email if member and member.email else '' }}" placeholder="e.g. client@justbefit.com" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Gender</label>
+                    <select name="gender" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                        <option value="Male" {% if member and member.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if member and member.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if member and member.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Date of Birth</label>
+                    <input type="date" name="dob" value="{{ member.dob if member and member.dob else '' }}" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Workout Routine, Split & Training Intensity -->
+        <div class="pt-6 border-t border-slate-800">
+            <h3 class="text-xs font-bold text-accent-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-dumbbell"></i>
+                <span>Workout Split, Training Intensity & Nutrition Plan</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Workout Routine Split</label>
+                    <input type="text" name="workout_split" value="{{ member.workout_split if member and member.workout_split else 'Push / Pull / Legs (5x/week)' }}" placeholder="e.g. Push/Pull/Legs (5x/wk), Upper/Lower" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Training Intensity Level</label>
+                    <select name="workout_intensity" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                        <option value="High Intensity Resistance" {% if member and member.workout_intensity == 'High Intensity Resistance' %}selected{% endif %}>High Intensity Resistance</option>
+                        <option value="Maximum Progressive Overload" {% if member and member.workout_intensity == 'Maximum Progressive Overload' %}selected{% endif %}>Maximum Progressive Overload (Heavy)</option>
+                        <option value="Moderate-High Resistance" {% if member and member.workout_intensity == 'Moderate-High Resistance' %}selected{% endif %}>Moderate-High Resistance</option>
+                        <option value="HIIT & Functional Circuit" {% if member and member.workout_intensity == 'HIIT & Functional Circuit' %}selected{% endif %}>HIIT & Functional Circuit</option>
+                        <option value="Gentle-Moderate Joint-Safe Routine" {% if member and member.workout_intensity == 'Gentle-Moderate Joint-Safe Routine' %}selected{% endif %}>Gentle-Moderate / Senior Safe</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nutrition Protocol / Calorie Target</label>
+                    <input type="text" name="nutrition_plan" value="{{ member.nutrition_plan if member and member.nutrition_plan else 'Caloric Deficit (2,000 kcal)' }}" placeholder="e.g. High Protein Deficit (2,100 kcal)" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div class="sm:col-span-3">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Trainer's Assessment & Workout Notes</label>
+                    <textarea name="trainer_assessment" rows="2" placeholder="Describe client's work ethic, attendance punctuality, form quality and progress..." class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl p-3 outline-none">{{ member.trainer_assessment if member and member.trainer_assessment else 'Consistently committed to routine. Focus on lifting form and recovery.' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Transformation Goals & Body Baseline -->
+        <div class="pt-6 border-t border-slate-800">
+            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-bullseye"></i>
+                <span>Transformation Goals & Body Metrics Baseline</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Primary Fitness Goal</label>
+                    <input type="text" name="fitness_goal" value="{{ member.fitness_goal if member and member.fitness_goal else '' }}" placeholder="e.g. Fat Loss, Lean Bulk, Core Strength" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Height (cm)</label>
+                    <input type="number" step="0.5" name="height_cm" value="{{ member.height_cm if member and member.height_cm else '' }}" placeholder="e.g. 175" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Target Goal Weight (kg)</label>
+                    <input type="number" step="0.5" name="target_weight" value="{{ member.target_weight if member and member.target_weight else '' }}" placeholder="e.g. 75.0" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+            </div>
+
+            {% if not member %}
+            <!-- Registration Baseline Weigh-in -->
+            <div class="mt-4 p-4 bg-slate-950/80 rounded-xl border border-slate-800">
+                <span class="text-xs font-bold text-slate-200 block mb-2"><i class="fa-solid fa-scale-balanced text-brand-400 mr-1.5"></i> Day-1 Registration Baseline Weigh-In</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Current Weight (kg) *</label>
+                        <input type="number" step="0.1" name="initial_weight" required placeholder="e.g. 88.0" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Body Fat %</label>
+                        <input type="number" step="0.1" name="body_fat_pct" placeholder="e.g. 24.5" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Chest (cm)</label>
+                        <input type="number" step="0.5" name="chest_cm" placeholder="cm" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Waist (cm)</label>
+                        <input type="number" step="0.5" name="waist_cm" placeholder="cm" class="w-full bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 outline-none">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Section 4: Emergency Contact & Medical Notes -->
+        <div class="pt-6 border-t border-slate-800">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-shield-heart text-rose-400"></i>
+                <span>Emergency Contact & Medical Considerations</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Emergency Contact Person</label>
+                    <input type="text" name="emergency_contact" value="{{ member.emergency_contact if member and member.emergency_contact else '' }}" placeholder="e.g. Parent / Spouse Name" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Emergency Phone Number</label>
+                    <input type="text" name="emergency_phone" value="{{ member.emergency_phone if member and member.emergency_phone else '' }}" placeholder="e.g. +91 98450 00000" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Medical / Injury Notes</label>
+                    <textarea name="medical_notes" rows="2" placeholder="List any knee issues, heart condition, past surgeries..." class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl p-3 outline-none">{{ member.medical_notes if member and member.medical_notes else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        {% if not member %}
+        <!-- Section 5: Initial Subscription Pass -->
+        <div class="pt-6 border-t border-slate-800">
+            <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Initial Gym Membership Pass</span>
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Select Membership Plan</label>
+                    <select name="plan_id" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                        <option value="">No Plan (Assign Later)</option>
+                        {% for p in plans %}
+                        <option value="{{ p.id }}">{{ p.name }} - ${{ p.price }} ({{ p.duration_months }} Month{{ 's' if p.duration_months != 1 else '' }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Method</label>
+                    <select name="payment_method" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+                        <option value="UPI / Online">UPI / Online Transfer</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Debit Card">Debit Card</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="pt-6 border-t border-slate-800 flex items-center justify-end space-x-3">
+            <a href="{{ url_for('members_list') }}" class="px-5 py-2.5 text-xs font-semibold text-slate-400 hover:text-white">
+                Cancel
+            </a>
+            <button type="submit" class="bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold text-xs px-7 py-3 rounded-xl shadow-lg shadow-brand-500/25 transition-all">
+                {% if member %}Update Profile{% else %}Complete Registration & Setup Journey{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

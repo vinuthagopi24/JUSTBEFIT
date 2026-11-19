@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Plans | JUSTBEFIT{% endblock %}
+{% block page_title %}Gym Membership Plans & Tiers{% endblock %}
+
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+        <h2 class="text-xl font-bold font-display text-white">Membership Packages & Pricing</h2>
+        <p class="text-xs text-slate-400">Manage packages offered to clients (duration, pricing, and perks)</p>
+    </div>
+    <button onclick="document.getElementById('newPlanModal').classList.remove('hidden')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors shadow-lg shadow-brand-500/20 flex items-center space-x-1.5 self-start sm:self-auto">
+        <i class="fa-solid fa-plus"></i>
+        <span>Create New Plan</span>
+    </button>
+</div>
+
+<!-- Plans Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for plan in plans %}
+    <div class="bg-slate-900/80 border border-slate-800 hover:border-brand-500/40 rounded-2xl p-6 flex flex-col justify-between transition-all group shadow-sm">
+        <div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-400">{{ plan.duration_months }} Month{{ 's' if plan.duration_months != 1 else '' }} Plan</span>
+                <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-brand-400 transition-colors">
+                    <i class="fa-solid fa-dumbbell text-xs"></i>
+                </span>
+            </div>
+
+            <h3 class="text-xl font-extrabold text-white font-display mt-2">{{ plan.name }}</h3>
+            <p class="text-xs text-slate-400 mt-1 min-h-[36px]">{{ plan.description or 'Comprehensive gym training pass.' }}</p>
+
+            <div class="mt-4 pt-4 border-t border-slate-800 flex items-baseline space-x-1">
+                <span class="text-3xl font-black text-white font-display">${{ "%.2f"|format(plan.price) }}</span>
+                <span class="text-xs text-slate-500">/ package</span>
+            </div>
+
+            {% if plan.features %}
+            <div class="mt-5 space-y-2">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Included Features:</span>
+                {% for feat in plan.features.split(',') %}
+                <div class="flex items-center space-x-2 text-xs text-slate-300">
+                    <i class="fa-solid fa-check text-brand-400 text-[10px]"></i>
+                    <span>{{ feat.strip() }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800">
+            <a href="{{ url_for('subscriptions_list') }}" class="w-full block text-center bg-slate-800 hover:bg-brand-500 text-slate-300 hover:text-white font-semibold text-xs py-2.5 rounded-xl border border-slate-700 hover:border-brand-500 transition-colors">
+                View Subscriptions with this Plan
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ================= MODAL: CREATE PLAN ================= -->
+<div id="newPlanModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div>
+                <h3 class="text-lg font-bold text-white font-display">Create Membership Plan</h3>
+                <p class="text-xs text-slate-400">Add a new gym tier for your customers</p>
+            </div>
+            <button onclick="document.getElementById('newPlanModal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('plans_view') }}" method="POST" class="mt-4 space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Plan Name *</label>
+                <input type="text" name="name" required placeholder="e.g. 6-Month Transformation Boost" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2.5 focus:border-brand-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Duration (Months) *</label>
+                    <input type="number" name="duration_months" required min="1" max="60" value="1" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Price ($) *</label>
+                    <input type="number" step="0.01" name="price" required placeholder="49.99" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Short Description</label>
+                <input type="text" name="description" placeholder="e.g. Unlimited access, free group classes and locker." class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Features (comma separated)</label>
+                <input type="text" name="features" placeholder="Free Sauna, Cardio + Weights, 1 PT Session" class="w-full bg-slate-950 border border-slate-800 text-slate-100 text-xs rounded-xl px-3 py-2 outline-none">
+            </div>
+
+            <div class="pt-3 border-t border-slate-800 flex items-center justify-end space-x-2">
+                <button type="button" onclick="document.getElementById('newPlanModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                    Cancel
+                </button>
+                <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-500/20">
+                    Save Plan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

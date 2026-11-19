@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Gym Analytics & Reports | JUSTBEFIT{% endblock %}
+{% block page_title %}Analytics, Financials & Data Exports{% endblock %}
+
+{% block content %}
+<!-- Export Center Cards -->
+<div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
+    <div class="flex items-center space-x-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-file-csv"></i>
+        </div>
+        <div>
+            <h2 class="text-base font-bold font-display text-white">One-Click CSV Data Export Center</h2>
+            <p class="text-xs text-slate-400">Download formatted spreadsheet reports of your gym database</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+        <!-- Members CSV -->
+        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-white block">Members Directory</span>
+                <span class="text-[11px] text-slate-400">Client details, goals & phones</span>
+            </div>
+            <a href="{{ url_for('export_csv', entity='members') }}" class="bg-brand-500/10 hover:bg-brand-500 text-brand-400 hover:text-white border border-brand-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-download text-[11px]"></i>
+                <span>Download</span>
+            </a>
+        </div>
+
+        <!-- Subscriptions CSV -->
+        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-white block">Subscriptions & Revenue</span>
+                <span class="text-[11px] text-slate-400">Plans, start/end & payments</span>
+            </div>
+            <a href="{{ url_for('export_csv', entity='subscriptions') }}" class="bg-accent-500/10 hover:bg-accent-500 text-accent-400 hover:text-white border border-accent-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-download text-[11px]"></i>
+                <span>Download</span>
+            </a>
+        </div>
+
+        <!-- Transformation Logs CSV -->
+        <div class="bg-slate-950/60 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
+            <div>
+                <span class="text-xs font-bold text-white block">Transformation History</span>
+                <span class="text-[11px] text-slate-400">Weigh-ins, BMIs & body metrics</span>
+            </div>
+            <a href="{{ url_for('export_csv', entity='transformation') }}" class="bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-download text-[11px]"></i>
+                <span>Download</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Business Financials & Performance Summary -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Revenue & Financial Breakdown -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-sm">
+        <h3 class="font-bold text-white font-display text-base flex items-center space-x-2 mb-4">
+            <i class="fa-solid fa-sack-dollar text-emerald-400"></i>
+            <span>Financial Performance</span>
+        </h3>
+
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-3.5 bg-slate-950/50 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 font-medium">Revenue This Month</span>
+                <span class="text-lg font-black text-emerald-400 font-display">${{ "%.2f"|format(metrics.revenue_month) }}</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3.5 bg-slate-950/50 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 font-medium">All-Time Cumulative Revenue</span>
+                <span class="text-lg font-black text-white font-display">${{ "%.2f"|format(metrics.total_revenue) }}</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3.5 bg-slate-950/50 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 font-medium">Active Paying Subscriptions</span>
+                <span class="text-lg font-black text-accent-400 font-display">{{ metrics.active_subscriptions }}</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3.5 bg-slate-950/50 rounded-xl border border-slate-800">
+                <span class="text-xs text-slate-400 font-medium">Upcoming Renewals (7 Days)</span>
+                <span class="text-lg font-black text-amber-400 font-display">{{ metrics.expiring_soon }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Membership Tier Distribution -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        <div>
+            <h3 class="font-bold text-white font-display text-base flex items-center space-x-2 mb-4">
+                <i class="fa-solid fa-layer-group text-brand-400"></i>
+                <span>Membership Packages in Circulation</span>
+            </h3>
+
+            <div class="space-y-3">
+                {% for plan in plans %}
+                <div class="p-3 bg-slate-950/50 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-white block">{{ plan.name }}</span>
+                        <span class="text-[10px] text-slate-500">{{ plan.duration_months }} Month Duration</span>
+                    </div>
+                    <span class="text-xs font-bold text-brand-400">${{ "%.2f"|format(plan.price) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400 text-center">
+            Need custom package duration? Manage them anytime in <a href="{{ url_for('plans_view') }}" class="text-brand-400 underline font-semibold">Plans & Tiers</a>.
+        </div>
+    </div>
+</div>
+{% endblock %}

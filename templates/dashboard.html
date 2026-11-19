@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | JUSTBEFIT Gym Suite{% endblock %}
+{% block page_title %}Gym Management & Transformation Suite{% endblock %}
+
+{% block content %}
+<!-- Aesthetic Gym Hero Banner -->
+<div class="relative overflow-hidden rounded-3xl border border-slate-800 p-6 sm:p-8 gym-hero-banner shadow-2xl">
+    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="max-w-xl">
+            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-xs font-bold uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-dumbbell text-brand-400"></i> JUSTBEFIT Suite
+            </span>
+            <h1 class="text-3xl sm:text-5xl font-black text-white font-display tracking-tight leading-tight">
+                Transformation
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                Complete client transformation engine with workout consistency tracking, body composition metrics, and membership subscription renewals.
+            </p>
+
+            <div class="mt-5 flex flex-wrap items-center gap-3">
+                <a href="{{ url_for('member_new') }}" class="inline-flex items-center space-x-2 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white text-xs font-black uppercase tracking-wider px-5 py-3 rounded-xl shadow-lg shadow-brand-500/30 transition-all">
+                    <i class="fa-solid fa-user-plus text-sm"></i>
+                    <span>+ Register New Customer</span>
+                </a>
+                <a href="{{ url_for('client_analysis') }}" class="inline-flex items-center space-x-2 bg-slate-900/90 hover:bg-slate-850 border border-slate-700/80 text-white text-xs font-bold px-4 py-3 rounded-xl transition-colors">
+                    <i class="fa-solid fa-chart-simple text-accent-400"></i>
+                    <span>Client Workout Analysis</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Walk-in Registration Widget -->
+        <div class="glass-card p-5 rounded-2xl border border-slate-700/60 max-w-sm w-full shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Quick Client Registration</span>
+                </span>
+                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono">10s Fast Entry</span>
+            </div>
+            <p class="text-xs text-slate-300 mb-3">Onboard a walk-in member with immediate baseline measurement:</p>
+            <a href="{{ url_for('member_new') }}" class="w-full flex items-center justify-center space-x-2 bg-brand-500/10 hover:bg-brand-500 text-brand-400 hover:text-white border border-brand-500/30 font-bold text-xs py-2.5 px-4 rounded-xl transition-all">
+                <span>Open Registration Form &rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Top KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <!-- Active Members -->
+    <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Clients</span>
+            <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+                <i class="fa-solid fa-users text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-3xl font-black text-white font-display">{{ metrics.total_members }}</span>
+            <span class="text-xs text-brand-400 font-medium">Enrolled</span>
+        </div>
+        <a href="{{ url_for('members_list') }}" class="mt-3 text-xs text-slate-400 hover:text-brand-400 flex items-center space-x-1 font-medium">
+            <span>View directory</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+    </div>
+
+    <!-- Active Subscriptions -->
+    <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Plans</span>
+            <div class="w-10 h-10 rounded-xl bg-accent-500/10 text-accent-400 flex items-center justify-center">
+                <i class="fa-solid fa-id-card text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-3xl font-black text-white font-display">{{ metrics.active_subscriptions }}</span>
+            <span class="text-xs text-accent-400 font-medium">Active Passes</span>
+        </div>
+        <a href="{{ url_for('subscriptions_list') }}" class="mt-3 text-xs text-slate-400 hover:text-accent-400 flex items-center space-x-1 font-medium">
+            <span>Manage plans</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+    </div>
+
+    <!-- Expiring in 7 Days (Renewal Alert) -->
+    <div class="glass-card {% if metrics.expiring_soon > 0 %}border-amber-500/40 bg-amber-950/20{% endif %} p-5 rounded-2xl relative overflow-hidden group transition-all shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold {% if metrics.expiring_soon > 0 %}text-amber-400{% else %}text-slate-400{% endif %} uppercase tracking-wider">Renewals Due</span>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i class="fa-solid fa-clock text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-3xl font-black text-amber-300 font-display">{{ metrics.expiring_soon }}</span>
+            <span class="text-xs text-amber-400/80 font-medium">Next 7 days</span>
+        </div>
+        <a href="{{ url_for('subscriptions_list', status='expiring_soon') }}" class="mt-3 text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-medium">
+            <span>Review alerts</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+    </div>
+
+    <!-- Revenue This Month -->
+    <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Month Revenue</span>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <i class="fa-solid fa-dollar-sign text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-3xl font-black text-white font-display">${{ "%.2f"|format(metrics.revenue_month) }}</span>
+            <span class="text-xs text-emerald-400 font-medium">Collected</span>
+        </div>
+        <a href="{{ url_for('reports_view') }}" class="mt-3 text-xs text-slate-400 hover:text-emerald-400 flex items-center space-x-1 font-medium">
+            <span>Financials</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+    </div>
+
+    <!-- Currently In Gym -->
+    <div class="glass-card p-5 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all shadow-sm">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Gym Floor Now</span>
+            <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                <i class="fa-solid fa-person-running text-lg"></i>
+            </div>
+        </div>
+        <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-3xl font-black text-sky-400 font-display">{{ metrics.currently_in_gym }}</span>
+            <span class="text-xs text-slate-400 font-medium">Lifting now</span>
+        </div>
+        <a href="{{ url_for('attendance_view') }}" class="mt-3 text-xs text-slate-400 hover:text-sky-400 flex items-center space-x-1 font-medium">
+            <span>Live check-in</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Transformation Leaderboard (Gopi, Vinutha, Bhairav, Acchu, Renuka, Shivanna, Rukmini, Appaji) -->
+<div class="glass-card rounded-2xl p-6 shadow-lg">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-400 animate-ping"></span>
+                <h2 class="text-lg font-bold font-display text-white">Client Transformation Leaderboard</h2>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Real transformation milestones tracked by weight, body fat & lean muscle</p>
+        </div>
+        <a href="{{ url_for('client_analysis') }}" class="inline-flex items-center space-x-2 text-xs font-bold text-accent-400 hover:text-accent-300 bg-accent-500/10 border border-accent-500/30 px-3 py-1.5 rounded-xl">
+            <span>Workout Analysis View &rarr;</span>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for hero in metrics.transformation_highlights %}
+        <div class="bg-slate-950/70 border border-slate-800 hover:border-brand-500/40 rounded-xl p-4 transition-all duration-200 group">
+            <div class="flex items-center space-x-3">
+                <img src="{{ hero.avatar_url }}" alt="{{ hero.name }}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-700 group-hover:border-brand-500 transition-colors">
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between">
+                        <a href="{{ url_for('member_detail', member_id=hero.id) }}" class="font-bold text-white hover:text-brand-400 text-sm truncate">
+                            {{ hero.name }}
+                        </a>
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">{{ hero.member_code }}</span>
+                    </div>
+                    <p class="text-xs text-slate-400 truncate">{{ hero.goal }}</p>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Baseline &rarr; Current</span>
+                    <span class="text-xs font-semibold text-slate-300">{{ hero.initial_weight }} kg &rarr; <span class="text-white font-bold">{{ hero.current_weight }} kg</span></span>
+                </div>
+
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 block uppercase tracking-wider">Net Progress</span>
+                    <span class="inline-block text-xs font-bold px-2 py-0.5 rounded-full {% if hero.weight_change < 0 %}bg-emerald-500/20 text-emerald-300 border border-emerald-500/40{% else %}bg-sky-500/20 text-sky-300 border border-sky-500/40{% endif %}">
+                        {% if hero.weight_change > 0 %}+{% endif %}{{ hero.weight_change }} kg
+                    </span>
+                </div>
+            </div>
+
+            <a href="{{ url_for('member_detail', member_id=hero.id) }}" class="mt-3 block text-center text-xs font-bold text-slate-400 hover:text-white bg-slate-900/60 hover:bg-slate-800 py-1.5 rounded-lg border border-slate-800 transition-colors">
+                View Transformation Trajectory &rarr;
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Two Column Layout: Workout Analysis Preview & Subscriptions Expiring Soon -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Client Workout Analysis Spotlight -->
+    <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-dumbbell text-brand-400"></i>
+                    <h3 class="font-bold text-white font-display">Client Workout & Discipline Insights</h3>
+                </div>
+                <a href="{{ url_for('client_analysis') }}" class="text-xs text-brand-400 hover:underline font-semibold">View All 8 Clients</a>
+            </div>
+
+            <div class="space-y-3">
+                {% for c in client_analyses %}
+                <div class="bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl hover:border-slate-700 transition-all">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <a href="{{ url_for('member_detail', member_id=c.id) }}" class="font-bold text-white hover:text-brand-400 text-xs">
+                                {{ c.first_name }}
+                            </a>
+                            <span class="text-[10px] text-slate-400">({{ c.analysis.workout_split.split('(')[0] }})</span>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border {{ c.analysis.rating_color }}">
+                            {{ c.analysis.rating_badge }}
+                        </span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-300 italic mt-2">"{{ c.analysis.trainer_assessment }}"</p>
+                    <div class="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+                        <span>Consistency: <strong class="text-white">{{ c.analysis.consistency_pct }}%</strong></span>
+                        <span>Avg: <strong class="text-white">{{ c.analysis.avg_visits_week }} workouts/wk</strong></span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+            <a href="{{ url_for('client_analysis') }}" class="text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center space-x-1">
+                <span>Open Detailed Workout Analysis Engine</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Subscriptions Expiring Soon -->
+    <div class="glass-card rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bell text-amber-400"></i>
+                    <h3 class="font-bold text-white font-display">Subscription Expiration Alerts (7 Days)</h3>
+                </div>
+                <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
+                    {{ expiring_soon|length }} Pending
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+                {% if expiring_soon %}
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="text-slate-400 border-b border-slate-800">
+                            <th class="pb-2 font-semibold">Client</th>
+                            <th class="pb-2 font-semibold">Plan</th>
+                            <th class="pb-2 font-semibold">Expires On</th>
+                            <th class="pb-2 font-semibold">Days Left</th>
+                            <th class="pb-2 text-right font-semibold">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        {% for sub in expiring_soon %}
+                        <tr class="hover:bg-slate-800/30 transition-colors">
+                            <td class="py-2.5">
+                                <a href="{{ url_for('member_detail', member_id=sub.member_id) }}" class="font-semibold text-white hover:text-brand-400 block">
+                                    {{ sub.first_name }}
+                                </a>
+                                <span class="text-slate-400 text-[11px]">{{ sub.phone }}</span>
+                            </td>
+                            <td class="py-2.5 text-slate-300 font-medium">{{ sub.plan_name }}</td>
+                            <td class="py-2.5 text-slate-300">{{ sub.end_date }}</td>
+                            <td class="py-2.5">
+                                <span class="px-2 py-0.5 rounded-full font-bold {% if sub.days_remaining <= 2 %}bg-rose-500/20 text-rose-300 border border-rose-500/40{% else %}bg-amber-500/20 text-amber-300 border border-amber-500/40{% endif %}">
+                                    {{ sub.days_remaining }} day{{ 's' if sub.days_remaining != 1 else '' }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 text-right">
+                                <a href="{{ url_for('member_detail', member_id=sub.member_id) }}" class="inline-block text-xs bg-brand-500 hover:bg-brand-600 text-white font-semibold px-2.5 py-1 rounded-lg shadow-sm">
+                                    Renew
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="py-10 text-center text-slate-500 text-xs">
+                    <i class="fa-solid fa-circle-check text-emerald-400 text-2xl mb-2 block"></i>
+                    All active subscriptions healthy.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-800 text-center">
+            <a href="{{ url_for('subscriptions_list') }}" class="text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center space-x-1">
+                <span>View All Subscriptions & Renewals</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Check-in & Today's Attendees Widget -->
+<div class="glass-card rounded-2xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+            <h3 class="font-bold text-white font-display flex items-center space-x-2">
+                <i class="fa-solid fa-clipboard-check text-accent-400"></i>
+                <span>Today's Front Desk Check-in Station</span>
+            </h3>
+            <p class="text-xs text-slate-400">Log arrivals and see who's currently lifting in the gym</p>
+        </div>
+
+        <form action="{{ url_for('attendance_checkin') }}" method="POST" class="flex items-center space-x-2">
+            <select name="member_id" required class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-brand-500 outline-none">
+                <option value="">Select Member to Check In...</option>
+                {% for m in members %}
+                <option value="{{ m.id }}">{{ m.member_code }} - {{ m.first_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors shadow-sm">
+                Check In
+            </button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+        {% for att in recent_attendees %}
+        <div class="bg-slate-950/70 border border-slate-800/90 p-3 rounded-xl flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs font-bold">
+                    {{ att.first_name[0] }}
+                </div>
+                <div>
+                    <span class="text-xs font-bold text-white block">{{ att.first_name }}</span>
+                    <span class="text-[10px] text-slate-400">In: {{ att.check_in_time.split(' ')[1][:5] }}</span>
+                </div>
+            </div>
+            {% if not att.check_out_time %}
+            <form action="{{ url_for('attendance_checkout', attendance_id=att.id) }}" method="POST">
+                <button type="submit" class="text-[11px] bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 px-2 py-1 rounded-md transition-colors" title="Check out">
+                    Check Out
+                </button>
+            </form>
+            {% else %}
+            <span class="text-[10px] text-slate-500 font-medium">Completed</span>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="col-span-4 text-center py-4 text-slate-500 text-xs">
+            No check-ins recorded for today yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

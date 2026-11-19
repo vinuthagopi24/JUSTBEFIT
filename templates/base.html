@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}JUSTBEFIT{% endblock %} | Gym Management & Transformation Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        accent: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS (Gym Aesthetic Background & Effects) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Outfit', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col md:flex-row gym-aesthetic-bg text-slate-200 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Mobile Nav Bar -->
+    <div class="md:hidden flex items-center justify-between bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center space-x-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/20 text-white font-bold text-lg">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <span class="font-display font-extrabold text-xl tracking-wider text-white">JUST<span class="text-brand-400">BE</span>FIT</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="{{ url_for('member_new') }}" class="bg-brand-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center space-x-1">
+                <i class="fa-solid fa-user-plus text-[10px]"></i>
+                <span>Register</span>
+            </a>
+            <button id="mobile-menu-btn" class="text-slate-300 hover:text-white p-2">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-slate-950/85 border-r border-slate-800/80 p-5 backdrop-blur-2xl shrink-0 z-30 fixed md:static inset-y-0 left-0 transition-transform duration-200 ease-in-out">
+        <!-- Logo -->
+        <div class="flex items-center space-x-3 mb-8 px-2">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 via-emerald-500 to-accent-500 flex items-center justify-center shadow-lg shadow-brand-500/30 text-white font-bold text-xl">
+                <i class="fa-solid fa-dumbbell"></i>
+            </div>
+            <div>
+                <span class="font-display font-black text-2xl tracking-wider text-white">JUST<span class="text-brand-400">BE</span>FIT</span>
+                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Pro Gym Management</p>
+            </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="space-y-1.5 flex-1">
+            <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'dashboard' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('members_list') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if 'member' in request.endpoint and request.endpoint != 'member_new' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    <span>Customers Roster</span>
+                </div>
+                <span class="text-xs bg-slate-800 text-slate-300 font-semibold px-2 py-0.5 rounded-full">8 Clients</span>
+            </a>
+
+            <!-- Client Workout Analysis Navigation -->
+            <a href="{{ url_for('client_analysis') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'client_analysis' %}bg-accent-500/15 text-accent-400 border border-accent-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-dumbbell w-5 text-center"></i>
+                    <span>Workout Analysis</span>
+                </div>
+                <span class="text-[10px] bg-accent-500/20 text-accent-300 font-bold px-1.5 py-0.5 rounded uppercase">Insights</span>
+            </a>
+
+            <a href="{{ url_for('subscriptions_list') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'subscriptions_list' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-id-card-clip w-5 text-center"></i>
+                    <span>Subscriptions</span>
+                </div>
+                {% if expiring_count > 0 %}
+                <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold animate-pulse">{{ expiring_count }} Due</span>
+                {% endif %}
+            </a>
+
+            <a href="{{ url_for('attendance_view') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'attendance_view' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
+                <span>Check-in Desk</span>
+            </a>
+
+            <a href="{{ url_for('plans_view') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'plans_view' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <i class="fa-solid fa-layer-group w-5 text-center"></i>
+                <span>Gym Plans & Tiers</span>
+            </a>
+
+            <a href="{{ url_for('reports_view') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all {% if request.endpoint == 'reports_view' %}bg-brand-500/15 text-brand-400 border border-brand-500/30 shadow-sm{% else %}text-slate-400 hover:text-slate-100 hover:bg-slate-900/60{% endif %}">
+                <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+                <span>Reports & CSV</span>
+            </a>
+        </nav>
+
+        <!-- Prominent New Customer Registration Button -->
+        <div class="pt-4 border-t border-slate-800/80">
+            <a href="{{ url_for('member_new') }}" class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-brand-500/25 transition-all text-xs uppercase tracking-wider group">
+                <i class="fa-solid fa-user-plus transition-transform group-hover:scale-125"></i>
+                <span>+ New Registration</span>
+            </a>
+
+            <!-- Quick Info -->
+            <div class="mt-4 flex items-center space-x-3 px-3 py-2 bg-slate-900/80 rounded-xl border border-slate-800">
+                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-brand-400 font-bold">
+                    <i class="fa-solid fa-shield-halved text-xs"></i>
+                </div>
+                <div class="text-xs">
+                    <p class="font-bold text-slate-200">Staff Portal</p>
+                    <p class="text-slate-400 text-[10px]">Active Session</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <!-- Topbar -->
+        <header class="bg-slate-950/70 border-b border-slate-800/80 px-6 py-4 flex items-center justify-between sticky top-0 backdrop-blur-xl z-20">
+            <div class="flex items-center space-x-3">
+                <h1 class="text-lg md:text-xl font-bold font-display text-white">{% block page_title %}Dashboard{% endblock %}</h1>
+                <span class="hidden sm:inline-block text-xs bg-slate-900/80 text-slate-300 border border-slate-800 px-3 py-1 rounded-full">
+                    <i class="fa-regular fa-calendar mr-1.5 text-brand-400"></i> {{ current_date }}
+                </span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <!-- Direct New Customer Registration Button in Topbar -->
+                <a href="{{ url_for('member_new') }}" class="inline-flex items-center space-x-1.5 bg-gradient-to-r from-brand-500 to-emerald-600 hover:from-brand-600 hover:to-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md shadow-brand-500/20 transition-all">
+                    <i class="fa-solid fa-user-plus text-[11px]"></i>
+                    <span class="hidden sm:inline">Add Customer</span>
+                </a>
+
+                <!-- Check-in shortcut -->
+                <a href="{{ url_for('attendance_view') }}" class="inline-flex items-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-slate-200 text-xs font-medium px-3 py-2 rounded-xl transition-colors">
+                    <i class="fa-solid fa-qrcode text-brand-400"></i>
+                    <span class="hidden sm:inline">Check-in</span>
+                </a>
+
+                <!-- Notification Alert Pill -->
+                {% if expiring_count > 0 %}
+                <a href="{{ url_for('subscriptions_list', status='expiring_soon') }}" class="inline-flex items-center space-x-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold px-3 py-2 rounded-xl transition-colors">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ expiring_count }} Renewal{{ 's' if expiring_count != 1 else '' }}</span>
+                </a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="px-6 pt-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flex items-center justify-between p-4 mb-3 rounded-xl border text-sm font-medium transition-all shadow-lg backdrop-blur-md
+                            {% if category == 'success' %}bg-emerald-950/70 text-emerald-300 border-emerald-500/40
+                            {% elif category == 'danger' %}bg-rose-950/70 text-rose-300 border-rose-500/40
+                            {% elif category == 'warning' %}bg-amber-950/70 text-amber-300 border-amber-500/40
+                            {% else %}bg-sky-950/70 text-sky-300 border-sky-500/40{% endif %}">
+                            <div class="flex items-center space-x-2.5">
+                                {% if category == 'success' %}<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+                                {% elif category == 'danger' %}<i class="fa-solid fa-circle-xmark text-rose-400 text-base"></i>
+                                {% elif category == 'warning' %}<i class="fa-solid fa-triangle-exclamation text-amber-400 text-base"></i>
+                                {% else %}<i class="fa-solid fa-circle-info text-sky-400 text-base"></i>{% endif %}
+                                <span>{{ message }}</span>
+                            </div>
+                            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Body -->
+        <main class="flex-1 p-6 space-y-6">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-slate-900 bg-slate-950/90 px-6 py-4 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 backdrop-blur-md">
+            <div>
+                <span class="font-bold text-slate-300">JUSTBEFIT</span> &bull; Empowering Gopi, Vinutha, Bhairav, Acchu, Renuka, Shivanna, Rukmini, Appaji & all clients.
+            </div>
+            <div class="flex items-center space-x-4">
+                <span><i class="fa-solid fa-server text-emerald-500 mr-1"></i> System Active</span>
+                <span>Waitress WSGI</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Mobile Drawer Script -->
+    <script>
+        const btn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        if (btn && sidebar) {
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+            });
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
