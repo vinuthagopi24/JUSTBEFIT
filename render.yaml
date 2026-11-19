@@ -1,12 +1,15 @@
 services:
   - type: web
     name: justbefit
-    env: python
+    runtime: python
+    plan: free
+    region: oregon
     buildCommand: "pip install -r requirements.txt && python seed_data.py"
     startCommand: "python serve.py"
-    plan: free
     envVars:
       - key: PORT
         value: 10000
+      - key: PYTHON_VERSION
+        value: 3.10.11
       - key: SECRET_KEY
         generateValue: true

@@ -1,19 +1,31 @@
-# 🏋️ JUSTBEFIT - Gym Management, Workout Analysis & Transformation Tracker
+# 🏋️ JUSTBEFIT - Gym Management & Transformation Suite
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/vinuthagopi24/JUSTBEFIT)
 
 A full-stack, responsive web application engineered for gyms, fitness trainers, and clients. **JUSTBEFIT** tracks end-to-end gym administration: member registration, transformation milestones (body weight, BMI, body fat %, circumferences), subscription lifecycle tracking with automated renewal alerts, front-desk check-in attendance, and deep workout performance analysis.
 
 ---
 
+## 🚀 One-Click Deploy to Render
+
+Click the button below to deploy your live instance directly onto Render:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/vinuthagopi24/JUSTBEFIT)
+
+Direct Blueprint Link: **[https://render.com/deploy?repo=https://github.com/vinuthagopi24/JUSTBEFIT](https://render.com/deploy?repo=https://github.com/vinuthagopi24/JUSTBEFIT)**
+
+---
+
 ## 👥 Seeded Customers Roster
 The system is pre-configured with the requested clients:
-1. **Gopi Kumar** (`JBF-0001`) — Goal: Fat Loss & Athletic Conditioning (`94.5 kg` &rarr; `81.2 kg`, **-13.3 kg**)
-2. **Vinutha Rao** (`JBF-0002`) — Goal: Strength & Core Toning (`65.0 kg` &rarr; `59.5 kg`, **-5.5 kg**)
-3. **Bhairav Prasad** (`JBF-0003`) — Goal: Hypertrophy / Clean Bulk (`68.0 kg` &rarr; `77.0 kg`, **+9.0 kg Muscle**)
-4. **Acchu Gowda** (`JBF-0004`) — Goal: Functional Athletic Stamina & HIIT (`74.0 kg` &rarr; `68.0 kg`, **-6.0 kg**)
-5. **Renuka Hegde** (`JBF-0005`) — Goal: Weight Loss & Posture Rehab (`78.5 kg` &rarr; `71.0 kg`, **-7.5 kg**)
-6. **Shivanna Patil** (`JBF-0006`) — Goal: Cardiovascular Health & Stamina (`86.0 kg` &rarr; `82.0 kg`, **-4.0 kg**)
-7. **Rukmini Devi** (`JBF-0007`) — Goal: Flexibility, Mobility & Lean Toning (`60.0 kg` &rarr; `56.2 kg`, **-3.8 kg**)
-8. **Appaji Gowda** (`JBF-0008`) — Goal: Senior Wellness & Joint Mobility (`75.0 kg` &rarr; `73.5 kg`, **-1.5 kg**)
+1. **Gopi** (`JBF-0001`) — Goal: Fat Loss & Conditioning (`94.5 kg` &rarr; `81.2 kg`, **-13.3 kg**)
+2. **Vinutha** (`JBF-0002`) — Goal: Strength & Core Toning (`65.0 kg` &rarr; `59.5 kg`, **-5.5 kg**)
+3. **Bhairav** (`JBF-0003`) — Goal: Hypertrophy / Clean Bulk (`68.0 kg` &rarr; `77.0 kg`, **+9.0 kg Muscle**)
+4. **Acchu** (`JBF-0004`) — Goal: Functional Athletic Stamina & HIIT (`74.0 kg` &rarr; `68.0 kg`, **-6.0 kg**)
+5. **Renuka** (`JBF-0005`) — Goal: Weight Loss & Posture Rehab (`78.5 kg` &rarr; `71.0 kg`, **-7.5 kg**)
+6. **Shivanna** (`JBF-0006`) — Goal: Cardiovascular Health & Stamina (`86.0 kg` &rarr; `82.0 kg`, **-4.0 kg**)
+7. **Rukmini** (`JBF-0007`) — Goal: Flexibility, Mobility & Lean Toning (`60.0 kg` &rarr; `56.2 kg`, **-3.8 kg**)
+8. **Appaji** (`JBF-0008`) — Goal: Senior Wellness & Joint Mobility (`75.0 kg` &rarr; `73.5 kg`, **-1.5 kg**)
 
 ---
 
